@@ -1,0 +1,9 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =7
+let g:netrw_dirhist_1='/Users/ryandekker/htdocs/dm/sites/all/themes/dm'
+let g:netrw_dirhist_2='/6'
+let g:netrw_dirhist_3='/Users/ryandekker/htdocs/dm/sites/all/themes/dm'
+let g:netrw_dirhist_4='/Users/ryandekker/htdocs/dm/sites/all/modules/patched/purr_messages'
+let g:netrw_dirhist_5='/Users/ryandekker/src/gitolite-admin'
+let g:netrw_dirhist_6='/Users/ryandekker/htdocs/dm/sites/all/themes/dm'
+let g:netrw_dirhist_7='/Users/ryandekker/htdocs/old/argo/sites/all/modules/clikfocus/custom'
