@@ -218,7 +218,10 @@ hotkey.bind(mash, 'T', function() ext.win.pos(window.focusedwindow(), "load") en
 
 -- hotkey.bind(hyper, 'G', function() ext.win.send(window.focusedwindow(), "left") end)
 hotkey.bind(hyper, 'C', function() saveSpaceWins() end)
-hotkey.bind(hyper, 'V', function()replaceSpaceWins() end)
+hotkey.bind(hyper, 'V', function() replaceSpaceWins() end)
+-- Constantly save the window positions in the active space.
+local t = timer.new(5, saveSpaceWins)
+t:start()
 
 hotkey.bind(hyper, "tab", function() ext.win.cycle(window.focusedwindow()) end)
 
