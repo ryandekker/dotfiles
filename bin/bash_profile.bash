@@ -1,7 +1,7 @@
 # Includes
 source `brew --prefix`/Library/Contributions/brew_bash_completion.sh
 source `brew --prefix`/Cellar/drush/6.3.0/etc/bash_completion.d/drush
-source ~/bin/git-completion.bash
+source ~/dotfiles/bin/git-completion.bash
 
 MACHINE_NAME=$(cat /info/machine_name)
 
