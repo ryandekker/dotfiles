@@ -1,0 +1,21 @@
+#ignore OS system files (Mac)
+*.DS_Store
+
+#ignore project files (Eclipse)
+*.project
+*.settings
+*.buildpath
+
+#ignore local machine specific directories
+*local
+*clkd.co
+
+#Not sure what this is. Probably another project file
+*.idea
+
+#sass cache is only for compiling sass to css so don't care about the cache
+.sass-cache
+
+#ctags indexes
+*.tags
+*.tags_sorted_by_file
