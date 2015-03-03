@@ -1,6 +1,6 @@
 - clean: ['~']
 
 - link:
-    ~/.mjolnir:
-      create: true
-      path: .mjolnir/
+    ~/.mjolnir: mjolnir/
+    ~/.luarocks: luarocks/
+    ~/.vim: vim/
