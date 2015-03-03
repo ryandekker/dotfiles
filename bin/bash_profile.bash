@@ -37,7 +37,8 @@ function gd
 {
     if [[ `git diff |wc -l` -gt 0 ]]
     then
-      git diff | /Applications/MacVim.app/Contents/MacOS/Vim -R -
+      # git diff | /Applications/MacVim.app/Contents/MacOS/Vim -R -
+      git difftool -d -t opendiff
     else
       echo "No changes since last commit."
     fi
