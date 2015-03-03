@@ -1,6 +1,6 @@
 # Includes
 source `brew --prefix`/Library/Contributions/brew_bash_completion.sh
-source `brew --prefix`/Cellar/drush/6.3.0/etc/bash_completion.d/drush
+source `brew --prefix`/Cellar/drush/6.5.0/etc/bash_completion.d/drush
 source ~/dotfiles/bin/git-completion.bash
 
 MACHINE_NAME=$(cat /info/machine_name)
@@ -8,12 +8,11 @@ MACHINE_NAME=$(cat /info/machine_name)
 # Make sure anything added by homebrew takes precendence over OS X defaults.
 export PATH="$HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/Cellar/ruby/1.9.3-p194/bin:$PATH"
 export PATH="$PATH:$HOME/.composer/vendor/bin"
-alias drush="/usr/local/opt/drush/bin/drush"
-alias mysql="/Applications/MAMP/Library/bin/mysql"
 
 # Platform.sh CLI configuration
 PLATFORMSH_CONF=~/.composer/vendor/platformsh/cli/platform.rc
 [ -f "$PLATFORMSH_CONF" ] && . "$PLATFORMSH_CONF"
+alias cbp="cordova build;cordova prepare"
 
 alias .up="$HOME/dotfiles/install"
 
@@ -31,9 +30,9 @@ alias gc="git commit"
 alias gcm="git commit -m"
 alias gpm="git push origin master"
 alias gs="git status"
+alias gsync="git pull && git push"
 alias gi="~/bin/git-info.sh"
-alias cbp="cordova build; cordova prepare"
-
+alias gl="git log --graph --oneline --all"
 function gd
 {
     if [[ `git diff |wc -l` -gt 0 ]]
@@ -76,6 +75,8 @@ function grmwd {
 
 alias sc="ssh clikbox.com"
 alias sr="ssh r.clkd.co"
+alias sb="ssh brandoncone@b.clkd.co"
+alias sj="ssh jessemutz@j.clkd.co"
 
 alias tmreload="osascript -e 'tell app "TextMate" to reload bundles'"
 
@@ -84,9 +85,15 @@ alias cts='ctags --langmap=php:.engine.inc.module.theme.php --php-kinds=cdfi --l
 
 alias cw='compass watch .'
 
-export DRUSH_PHP="/Applications/MAMP/bin/php/php5.5.18/bin/php"
-#export DRUSH_PHP="/Applications/MAMP/bin/php5.4.26/bin/php"
+export DRUSH_PHP="/usr/local/opt/php55/bin/php"
 
+
+# pretty colors in terminal :)
+export CLICOLOR=1
+export LSCOLORS=GxFxCxDxBxegedabagaced
+
+alias bin="sub ~/bin"
+alias vadm="varnishadm -T:6082"
 
 # Git editor
 #export GIT_EDITOR="/usr/bin/vim"
@@ -96,9 +103,6 @@ export EDITOR="subl -n"
 #export EDITOR=/usr"/local/bin/mate"
 alias sub="subl -n"
 
-export CLICOLOR=1
-export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
-
 alias ht="cd ~/htdocs"
 alias hosts="sudo $EDITOR /etc/hosts"
 alias vhost="$EDITOR ~/vhost.d"
@@ -106,8 +110,13 @@ alias aliases="$EDITOR ~/.drush/aliases.drushrc.php"
 alias drushrc="$EDITOR ~/.drushrc.php"
 alias pc="pwd | pbcopy"
 
-alias rma="sudo /Applications/MAMP/bin/apache2/bin/apachectl restart"
+alias rma="sudo lunchy restart httpd22;lunchy restart mysql"
+alias rap="sudo lunchy restart httpd22"
+alias rmy="lunchy restart mysql"
 
+alias php53="brew-php-select --set php53"
+alias php54="brew-php-select --set php54"
+alias php55="brew-php-select --set php55"
 alias fdns="sudo killall -HUP mDNSResponder"
 
 # Start, stop and restart solr easily.
