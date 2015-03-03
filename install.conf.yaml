@@ -1,0 +1,6 @@
+- clean: ['~']
+
+- link:
+    ~/.mjolnir:
+      create: true
+      path: .mjolnir/
