@@ -15,6 +15,8 @@ alias mysql="/Applications/MAMP/Library/bin/mysql"
 PLATFORMSH_CONF=~/.composer/vendor/platformsh/cli/platform.rc
 [ -f "$PLATFORMSH_CONF" ] && . "$PLATFORMSH_CONF"
 
+alias .up="$HOME/dotfiles/install"
+
 
 alias ll="ls -l"
 alias la="ls -la"
