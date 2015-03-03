@@ -66,14 +66,37 @@ local function nudge(dir, dist)
   end
 end
 
-local function setsize(size)
+local function setsize(size, stock)
   local win = window.focusedwindow()
   local app = win.application(win)
   local name = app.title(app)
+  local frame = win:frame()
   local w = 0
   local h = 0
   local dims = {}
 
+  -- Generic app configs
+  if stock == "m" then
+    if size == "s" then
+      w = 600
+      h = 500
+    elseif size == "m" then
+      w = 800
+      h = 600
+    elseif size == "l" then
+      w = 1200
+      h = 1000
+    end
+
+    if w > 0 then
+      frame.w = w
+      frame.h = h
+      ext.win.set(win, frame)
+    end
+    return
+  end
+
+  -- Per app configs
   if name == "Sublime Text 2" then
     if size == "s" then
       w = 800
@@ -216,12 +239,13 @@ end
 hotkey.bind(hyper, 'T', function() ext.win.pos(window.focusedwindow(), "update") end)
 hotkey.bind(mash, 'T', function() ext.win.pos(window.focusedwindow(), "load") end)
 
--- hotkey.bind(hyper, 'G', function() ext.win.send(window.focusedwindow(), "left") end)
 hotkey.bind(hyper, 'C', function() saveSpaceWins() end)
 hotkey.bind(hyper, 'V', function() replaceSpaceWins() end)
 -- Constantly save the window positions in the active space.
-local t = timer.new(5, saveSpaceWins)
-t:start()
+-- (actually, that kinda prevents to more than 5 seconds ago...
+ -- maybe have two save types?)
+-- local t = timer.new(5, saveSpaceWins)
+-- t:start()
 
 hotkey.bind(hyper, "tab", function() ext.win.cycle(window.focusedwindow()) end)
 
@@ -230,6 +254,10 @@ hotkey.bind(hyper, "tab", function() ext.win.cycle(window.focusedwindow()) end)
 hotkey.bind(hyper, 'E', function() setsize("s") end)
 hotkey.bind(hyper, 'D', function() setsize("m") end)
 hotkey.bind(hyper, 'C', function() setsize("l") end)
+-- Generic app sizes
+hotkey.bind(mash, 'E', function() setsize("s", "m") end)
+hotkey.bind(mash, 'D', function() setsize("m", "m") end)
+hotkey.bind(mash, 'C', function() setsize("l", "m") end)
 
 -- RESIZES
 -- Small resizes
