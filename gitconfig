@@ -1,12 +1,16 @@
+[core]
+  excludesfile = /Users/ryandekker/.gitignore
 [user]
   name = Ryan Dekker
   email = ryan@clikfocus.com
-[core]
-  excludesfile = /Users/ryandekker/.gitignore
 [color]
   diff = auto
   status = auto
   branch = auto
   interactive = true
 [push]
-	default = simple
+  default = tracking
+;[diff]
+; external = /Users/ryandekker/bin/git-diff-filemerge.sh
+[merge]
+  tool = opendiff
