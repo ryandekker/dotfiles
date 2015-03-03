@@ -7,8 +7,10 @@
 *.buildpath
 
 #ignore local machine specific directories
-*local
-*clkd.co
+local
+*.local
+*.clkd.co
+sites.php
 
 #Not sure what this is. Probably another project file
 *.idea
