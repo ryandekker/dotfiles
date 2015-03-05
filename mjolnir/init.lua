@@ -110,13 +110,13 @@ local function setsize(size, stock)
     end
   elseif name == "Google Chrome" then
     if size == "s" then
-      w = 1100
-      h = 980
-    elseif size == "m" then
       w = 1230
       h = 1028
+    elseif size == "m" then
+      w = 1280
+      h = 1280
     elseif size == "l" then
-      w = 1400
+      w = 1280
       h = 1600
     end
   elseif name == "iTerm" then
@@ -219,33 +219,34 @@ function push(dir)
 
 end
 
-function saveSpaceWins()
+function saveSpaceWins(key)
   local wins = ext.utils.visiblewindows()
 
   for k, win in pairs(wins) do
-    ext.utils.windowinfo_set(win)
+    ext.utils.windowinfo_set(win, key)
   end
 end
 
-function replaceSpaceWins()
+function replaceSpaceWins(key)
   local wins = ext.utils.visiblewindows()
 
   for k, win in pairs(wins) do
-    ext.utils.windowinfo_reset(win)
+    ext.utils.windowinfo_reset(win, key)
   end
 end
 
 -- testing stuff
-hotkey.bind(hyper, 'T', function() ext.win.pos(window.focusedwindow(), "update") end)
-hotkey.bind(mash, 'T', function() ext.win.pos(window.focusedwindow(), "load") end)
+hotkey.bind(hyper, 'T', function() alert.show(show_table(window.focusedwindow():frame()), 10) end)
+-- hotkey.bind(mash, 'T', function() ext.win.pos(window.focusedwindow(), "load") end)
 
-hotkey.bind(hyper, 'C', function() saveSpaceWins() end)
-hotkey.bind(hyper, 'V', function() replaceSpaceWins() end)
+hotkey.bind(hyper, 'C', function() saveSpaceWins('manual-app-info') end)
+hotkey.bind(hyper, 'V', function() replaceSpaceWins('manual-app-info') end)
 -- Constantly save the window positions in the active space.
 -- (actually, that kinda prevents to more than 5 seconds ago...
  -- maybe have two save types?)
 -- local t = timer.new(5, saveSpaceWins)
 -- t:start()
+-- hotkey.bind(mash, 'V', replaceSpaceWins)
 
 hotkey.bind(hyper, "tab", function() ext.win.cycle(window.focusedwindow()) end)
 
@@ -301,8 +302,8 @@ hotkey.bind(hyper, 'S', function() push("se") end)
 hotkey.bind(hyper, 'A', function() push("sw") end)
 
 -- SCREENS
-hotkey.bind(hyper, ']', grid.pushwindow_nextscreen)
-hotkey.bind(hyper, '[', grid.pushwindow_prevscreen)
+hotkey.bind(hyper, ']', function() ext.win.throw(window.focusedwindow(), 'next') end)
+hotkey.bind(hyper, '[', function() ext.win.throw(window.focusedwindow(), 'previous') end)
 
 --WINDOW FOCUS
 hotkey.bind(hyper, 'Y',  function() window.focusedwindow():focuswindow_west() end)
@@ -316,6 +317,12 @@ hotkey.bind(mash, 'U', function() push("s") end)
 hotkey.bind(mash, 'I', function() push("n") end)
 hotkey.bind(mash, 'O', function() push("e") end)
 
+--Shoves
+hotkey.bind(mash, 'Y', function() resize("w") end)
+hotkey.bind(mash, 'U', function() resize("s") end)
+hotkey.bind(mash, 'I', function() resize("n") end)
+hotkey.bind(mash, 'O', function() resize("e") end)
+
 -- HELPER FUNCTIONS
 hotkey.bind(mash, 'R', function() mjolnir.reload() end)
 -- "fancy" reloading
@@ -323,55 +330,7 @@ function reload_config(files)
   mjolnir.reload()
 end
 pathwatcher.new(os.getenv("HOME") .. "/.mjolnir/", reload_config):start()
--- alert.show("Config reloaded")
 
--- hotkey.bind(mash, 'Q', function() nudge("nw", "s") end)
--- hotkey.bind(mash, 'E', function() nudge("ne", "s") end)
--- hotkey.bind(mash, 'C', function() nudge("se", "s") end)
--- hotkey.bind(mash, 'Z', function() nudge("sw", "s") end)
-
--- hotkey.bind(mash, ';', function() grid.snap(window.focusedwindow()) end)
--- hotkey.bind(mash, "'", function() fnutils.map(window.visiblewindows(), grid.snap) end)
-
--- hotkey.bind(mash,      '=', function() grid.adjustwidth(1) end)
--- hotkey.bind(mash,      '-', function() grid.adjustwidth(-1) end)
--- hotkey.bind(mashshift, '=', function() grid.adjustheight(1) end)
--- hotkey.bind(mashshift, '-', function() grid.adjustheight(-1) end)
-
--- hotkey.bind(mashshift, 'left',  function() window.focusedwindow():focuswindow_west() end)
--- hotkey.bind(mashshift, 'right', function() window.focusedwindow():focuswindow_east() end)
--- hotkey.bind(mashshift, 'up',    function() window.focusedwindow():focuswindow_north() end)
--- hotkey.bind(mashshift, 'down',  function() window.focusedwindow():focuswindow_south() end)
-
--- hotkey.bind(mash,      'M', grid.maximize_window)
--- hotkey.bind(mashshift, 'M', function() window.focusedwindow():minimize() end)
-
--- hotkey.bind(mash,      'F', function() window.focusedwindow():setfullscreen(true) end)
--- hotkey.bind(mashshift, 'F', function() window.focusedwindow():setfullscreen(false) end)
-
--- hotkey.bind(mash, 'N', grid.pushwindow_nextscreen)
--- hotkey.bind(mash, 'P', grid.pushwindow_prevscreen)
-
--- hotkey.bind(mash, 'J', grid.pushwindow_down)
--- hotkey.bind(mash, 'K', grid.pushwindow_up)
--- hotkey.bind(mash, 'H', grid.pushwindow_left)
--- hotkey.bind(mash, 'L', grid.pushwindow_right)
-
--- hotkey.bind(mash, 'U', grid.resizewindow_taller)
--- hotkey.bind(mash, 'O', grid.resizewindow_wider)
--- hotkey.bind(mash, 'I', grid.resizewindow_thinner)
--- hotkey.bind(mash, 'Y', grid.resizewindow_shorter)
-
--- hotkey.bind(mashshift, 'space', spotify.displayCurrentTrack)
--- hotkey.bind(mashshift, 'P',     spotify.play)
--- hotkey.bind(mashshift, 'O',     spotify.pause)
--- hotkey.bind(mashshift, 'N',     spotify.next)
--- hotkey.bind(mashshift, 'I',     spotify.previous)
-
--- hotkey.bind(mashshift, 'T', function() alert.show(os.date("%A %b %d, %Y - %I:%M%p"), 4) end)
-
--- hotkey.bind(mashshift, ']', function() audiodevice.defaultoutputdevice():setvolume(audiodevice.current().volume + 5) end)
--- hotkey.bind(mashshift, '[', function() audiodevice.defaultoutputdevice():setvolume(audiodevice.current().volume - 5) end)
 
 -- alert_sound:play()
 -- alert.show("Mjolnir, at your service.", 3)

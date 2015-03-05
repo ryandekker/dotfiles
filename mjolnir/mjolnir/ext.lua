@@ -260,11 +260,11 @@ function ext.win.throw(win, direction)
 
   local frame = win:frame()
 
-  frame.x = screen.x
-  frame.y = screen.y
+  -- frame.x = screen.x
+  -- frame.y = screen.y
 
   frame = ext.frame.fit(frame, screen)
-  frame = ext.frame.center(frame, screen)
+  -- frame = ext.frame.center(frame, screen)
 
   ext.win.fix(win)
   ext.win.set(win, frame)
@@ -272,7 +272,7 @@ function ext.win.throw(win, direction)
   win:focus()
 
   -- center after setting frame, fixes terminal and macvim
-  ext.win.center(win)
+  -- ext.win.center(win)
 end
 
 -- set window size and center
@@ -415,7 +415,8 @@ function ext.utils.visiblewindows()
 end
 
 -- get a better list of visible windows than  windows.visiblewindows will give.
-function ext.utils.windowinfo_set(win)
+function ext.utils.windowinfo_set(win, key)
+  key = key or "app_info"
   -- get a full list of windows and whittle it down.
   local app = win:application():bundleid()
   local appwinids = settings.get("app_info--" .. app) or {}
@@ -442,11 +443,12 @@ function ext.utils.windowinfo_set(win)
   }
 
   -- Save the stuff.
-  settings.set("app_info--" .. app, appwinids)
-  settings.set("app_info--" .. app .. "--" .. id, app_info)
+  settings.set(key .. "--" .. app, appwinids)
+  settings.set(key .. "--" .. app .. "--" .. id, app_info)
 end
 
-function ext.utils.windowinfo_reset(win)
+function ext.utils.windowinfo_reset(win, key)
+  key = key or "app_info"
   -- get a full list of windows and whittle it down.
   local app = win:application():bundleid()
   local appwinids = settings.get("app_info--" .. app) or {}
@@ -456,12 +458,12 @@ function ext.utils.windowinfo_reset(win)
   local screen = win:screen()
 
   -- Look up window location by id
-  local nwin = settings.get("app_info--" .. app .. "--" .. id)
+  local nwin = settings.get(key .. "--" .. app .. "--" .. id)
 
   -- If the window's id isn't set, try to look it up by the window's title.
   if nwin == nil then
     local newid = appwinids[title]
-    nwin = settings.get("app_info--" .. app .. "--" .. newid)
+    nwin = settings.get(key .. "--" .. app .. "--" .. newid)
   end
 
   local frame = {
