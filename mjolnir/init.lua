@@ -253,11 +253,11 @@ hotkey.bind(hyper, "tab", function() ext.win.cycle(window.focusedwindow()) end)
 -- Set window sizes, with per app config.
 hotkey.bind(hyper, 'E', function() setsize("s") end)
 hotkey.bind(hyper, 'D', function() setsize("m") end)
-hotkey.bind(hyper, 'C', function() setsize("l") end)
+hotkey.bind(hyper, 'X', function() setsize("l") end)
 -- Generic app sizes
 hotkey.bind(mash, 'E', function() setsize("s", "m") end)
 hotkey.bind(mash, 'D', function() setsize("m", "m") end)
-hotkey.bind(mash, 'C', function() setsize("l", "m") end)
+hotkey.bind(mash, 'X', function() setsize("l", "m") end)
 
 -- RESIZES
 -- Small resizes
