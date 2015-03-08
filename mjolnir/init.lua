@@ -7,6 +7,7 @@ local keycodes    = require "mjolnir.keycodes"
 local timer       = require "mjolnir._asm.timer"
 local transform   = require "mjolnir.sk.transform"
 local window      = require "mjolnir.window"
+local screen      = require "mjolnir.screen"
 
 local alert       = require "mjolnir.alert"
 local grid        = require "mjolnir.bg.grid"
@@ -236,8 +237,11 @@ function replaceSpaceWins(key)
 end
 
 -- testing stuff
-hotkey.bind(hyper, 'T', function() alert.show(show_table(window.focusedwindow():frame()), 10) end)
--- hotkey.bind(mash, 'T', function() ext.win.pos(window.focusedwindow(), "load") end)
+-- hotkey.bind(hyper, 'T', function() alert.show(show_table(window.focusedwindow():frame()) .. show_table(window.focusedwindow():screen():fullframe()), 10)
+-- print(show_table(window.focusedwindow():frame()), show_table(window.focusedwindow():screen():frame())) end)
+
+hotkey.bind(hyper, 'T', function() print(ext.screen.win_screen_info(window.focusedwindow(),window.focusedwindow():screen())) end)
+hotkey.bind(mash, 'T', function() ext.screen.getscreeninfo() end)
 
 hotkey.bind(hyper, 'C', function() saveSpaceWins('manual-app-info') end)
 hotkey.bind(hyper, 'V', function() replaceSpaceWins('manual-app-info') end)
@@ -306,6 +310,8 @@ hotkey.bind(hyper, ']', function() ext.win.throw(window.focusedwindow(), 'next')
 hotkey.bind(hyper, '[', function() ext.win.throw(window.focusedwindow(), 'previous') end)
 
 --WINDOW FOCUS
+-- If this is sluggish, it appears to be due to a stuck process in the
+-- background, kill it and the delay seems to go away
 hotkey.bind(hyper, 'Y',  function() window.focusedwindow():focuswindow_west() end)
 hotkey.bind(hyper, 'O', function() window.focusedwindow():focuswindow_east() end)
 hotkey.bind(hyper, 'I',    function() window.focusedwindow():focuswindow_north() end)
@@ -318,10 +324,10 @@ hotkey.bind(mash, 'I', function() push("n") end)
 hotkey.bind(mash, 'O', function() push("e") end)
 
 --Shoves
-hotkey.bind(mash, 'Y', function() resize("w") end)
-hotkey.bind(mash, 'U', function() resize("s") end)
-hotkey.bind(mash, 'I', function() resize("n") end)
-hotkey.bind(mash, 'O', function() resize("e") end)
+hotkey.bind(smash, 'Y', function() resize("w") end)
+hotkey.bind(smash, 'U', function() resize("s") end)
+hotkey.bind(smash, 'I', function() resize("n") end)
+hotkey.bind(smash, 'O', function() resize("e") end)
 
 -- HELPER FUNCTIONS
 hotkey.bind(mash, 'R', function() mjolnir.reload() end)

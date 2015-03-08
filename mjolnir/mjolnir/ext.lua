@@ -6,6 +6,7 @@ local keycodes    = require "mjolnir.keycodes"
 local timer       = require "mjolnir._asm.timer"
 local transform   = require "mjolnir.sk.transform"
 local window      = require "mjolnir.window"
+local screen      = require "mjolnir.screen"
 local alert       = require "mjolnir.alert"
 local settings    = require "mjolnir._asm.settings"
 -- local tiling      = require "mjolnir.tiling"
@@ -18,6 +19,7 @@ local ext = {
   frame = {},
   win = {},
   app = {},
+  screen = {},
   utils = {}
 }
 
@@ -155,6 +157,46 @@ function ext.frame.center(frame, screen)
   return frame
 end
 
+-- Get the frame's edge axis or value
+-- return_type can be axis, value or placed
+function ext.frame.dir_edge(dir, frame, return_type, mod_frame)
+  local axis, value, placed
+
+  -- West and north are easy, does the frame match on x,y axis?
+  if dir == 'w' then
+    axis = 'x'
+    value = frame.x
+    placed = frame.x
+  end
+  if dir == 'n' then
+    axis = 'y'
+    value = frame.y
+    placed = frame.y
+  end
+  -- East and south are a bit harder, check that the sum or difference matches.
+  if dir == 'e' then
+    axis = 'x'
+    value = frame.x + frame.w
+    -- Ternary to only fire selectively; screen frame w+x - window w.
+    placed = mod_frame ~= nil and frame.w + frame.x - mod_frame.w or 0
+  end
+  if dir == 's' then
+    axis = 'y'
+    value = frame.y + frame.h
+    -- Ternary to only fire selectively; screen frame h+y - window h.
+    placed = mod_frame ~= nil and  frame.h + frame.y - mod_frame.h or 0
+  end
+
+  -- Return value by default.
+  if return_type == 'axis' then
+    return axis
+  elseif return_type == 'placed' then
+    return placed
+  else
+    return value
+  end
+end
+
 -- get screen frame
 function ext.win.screenframe(win)
   local funcname = ext.win.fullframe and "fullframe" or "frame"
@@ -250,21 +292,22 @@ function ext.win.full(win)
 end
 
 -- throw to next screen, center and fit
-function ext.win.throw(win, direction)
+function ext.win.throwcenter(win, direction)
   local framefunc = ext.win.fullframe and "fullframe" or "frame"
   local screenfunc = direction == "next" and "next" or "previous"
 
   local winscreen = win:screen()
   local throwscreen = winscreen[screenfunc](winscreen)
+  -- Technically a frame object.
   local screen = throwscreen[framefunc](throwscreen)
 
   local frame = win:frame()
 
-  -- frame.x = screen.x
-  -- frame.y = screen.y
+  frame.x = screen.x
+  frame.y = screen.y
 
   frame = ext.frame.fit(frame, screen)
-  -- frame = ext.frame.center(frame, screen)
+  frame = ext.frame.center(frame, screen)
 
   ext.win.fix(win)
   ext.win.set(win, frame)
@@ -272,7 +315,55 @@ function ext.win.throw(win, direction)
   win:focus()
 
   -- center after setting frame, fixes terminal and macvim
-  -- ext.win.center(win)
+  ext.win.center(win)
+end
+
+-- Throw to next screen, maintaining edge position if applicable (else just x,y).
+function ext.win.throw(win, direction)
+  local framefunc = ext.win.fullframe and "fullframe" or "frame"
+  local screenfunc = direction == "next" and "next" or "previous"
+
+  local winscreen = win:screen()
+  local throwscreen = winscreen[screenfunc](winscreen)
+  -- Technically a frame object.
+  local screen = throwscreen[framefunc](throwscreen)
+
+  local frame = win:frame()
+
+  -- Get window positioning in current screen
+  local similarities = ext.screen.win_screen_info(win, winscreen)
+
+  -- If there is at least one edge to snap to, use it.
+  if ext.utils.table_length(similarities) > 0 then
+    local count = 0
+    for dir,_ in pairs(similarities) do
+      -- Only run through the first two similarities (in order to prevent
+      -- sizing up window and for simplicity).
+      if count > 1 then
+        break
+      end
+      count = count + 1
+
+      -- Get new window location.
+      local axis = ext.frame.dir_edge(dir, screen, 'axis')
+      local value = ext.frame.dir_edge(dir, screen, 'placed', frame)
+
+      -- Sets the new window location.
+      frame[axis] = value
+    end
+  -- Can't track down an edge to snap to?
+  else
+    -- Set it from the top left and hope it stays on screen...
+    frame.x = screen.x + frame.x - winscreen[framefunc](winscreen).x
+    frame.y = screen.y + frame.y - winscreen[framefunc](winscreen).y
+  end
+
+  frame = ext.frame.fit(frame, screen)
+
+  ext.win.fix(win)
+  ext.win.set(win, frame)
+
+  win:focus()
 end
 
 -- set window size and center
@@ -330,6 +421,62 @@ function ext.win.cycle(win)
       windows[activewindowindex]:focus()
     end
   end
+end
+
+-- Saves some screen information in settings.
+function ext.screen.getscreeninfo()
+  local allscreens = screen.allscreens()
+  local screen_count = ext.screen.screen_count()
+  -- Store settings a a per screen-count basis
+  local screen_info = settings.get("screen_info--" .. screen_count) or {}
+  local screen_indexes = settings.get("screen_indexes--" .. screen_count) or {}
+
+  -- screen_index isn't anything scientific and probably isn't stable, but they
+  -- do seem to be in the order that OS X thinks of them.
+  for screen_index, screen in pairs(allscreens) do
+    local screenframe = screen:fullframe()
+    screen_info[screen_index] = screenframe
+    screen_indexes[screen_index] = screen:id()
+
+    print(screen_index..'--', screen:id())
+    -- print(i..'--', show_table(screenframe))
+  end
+
+  settings.set("screen_info--" .. screen_count, screen_info)
+  settings.set("screen_indexes--" .. screen_count, screen_indexes)
+end
+
+-- Saves some screen information in settings.
+function ext.screen.getscreenindex(screen_id)
+  local screen_count = ext.screen.screen_count()
+  -- Store settings a a per screen-count basis
+  local screen_indexes = settings.get("screen_indexes--" .. screen_count) or {}
+
+  return fnutils.indexof(screen_indexes, screen_id)
+end
+
+-- Saves some screen information in settings.
+function ext.screen.screen_count()
+  local allscreens = screen.allscreens()
+  local screen_count = ext.utils.table_length(allscreens)
+  return screen_count
+end
+
+-- Returns information about the window placed in the given screen
+function ext.screen.win_screen_info(win, screen)
+  local wframe = win:frame()
+  -- Note that this is must be fullframe.
+  local sframe = screen:fullframe()
+  local similarities = {}
+
+  -- Compare each direction for win and screen.
+  fnutils.each({'w','n','e','s'}, function(dir)
+    if ext.frame.dir_edge(dir, wframe) == ext.frame.dir_edge(dir, sframe) then
+      similarities[dir] = true
+    end
+  end)
+
+  return similarities
 end
 
 -- launch or focus or cycle app
@@ -414,7 +561,7 @@ function ext.utils.visiblewindows()
   return visiblewindows
 end
 
--- get a better list of visible windows than  windows.visiblewindows will give.
+-- Save the current position of all currently visible windows.
 function ext.utils.windowinfo_set(win, key)
   key = key or "app_info"
   -- get a full list of windows and whittle it down.
@@ -447,6 +594,7 @@ function ext.utils.windowinfo_set(win, key)
   settings.set(key .. "--" .. app .. "--" .. id, app_info)
 end
 
+-- Resets windows based on whatever was previously saved in settings.
 function ext.utils.windowinfo_reset(win, key)
   key = key or "app_info"
   -- get a full list of windows and whittle it down.
@@ -475,6 +623,17 @@ function ext.utils.windowinfo_reset(win, key)
 
   ext.win.set(win, frame)
 
+end
+
+-- Lua and Mjolnir lack a table length function.
+function ext.utils.table_length(table)
+  local count = 0
+  if type(table) == 'table' then
+    for _ in pairs(table) do
+      count = count + 1
+    end
+  end
+  return count
 end
 
 -- apply function to a window with optional params, saving it's position for restore
