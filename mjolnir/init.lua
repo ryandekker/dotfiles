@@ -114,7 +114,7 @@ local function setsize(size, stock)
       h = 1028
     elseif size == "m" then
       w = 1280
-      h = 1280
+      h = 1100
     elseif size == "l" then
       w = 1280
       h = 1600
