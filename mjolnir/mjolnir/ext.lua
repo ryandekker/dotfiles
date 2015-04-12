@@ -9,9 +9,8 @@ local window      = require "mjolnir.window"
 local screen      = require "mjolnir.screen"
 local alert       = require "mjolnir.alert"
 local settings    = require "mjolnir._asm.settings"
--- local tiling      = require "mjolnir.tiling"
-local spaces      = require "mjolnir.spaces"
-local undocumented = require("mjolnir._asm.hydra.undocumented")
+local totalspaces = require "mjolnir.totalspaces"
+local undocumented= require("mjolnir._asm.hydra.undocumented")
 local inspect     = require 'inspect'
 
 -- extensions
@@ -566,17 +565,30 @@ function ext.utils.windowinfo_set(win, key)
   key = key or "app_info"
   -- get a full list of windows and whittle it down.
   local app = win:application():bundleid()
+  if app == nil then
+    app = 'nobundle'
+  end
+
+
+  if (win:id() == nil) then
+    return
+  end
+
   local appwinids = settings.get("app_info--" .. app) or {}
   local id = win:id()
   local title = win:title()
   local frame = win:frame()
   local screen = win:screen()
 
-  -- if winids[app] ~= nil then
-  --   winids[app] = winids[app]
-  -- else
-  --   winids[app] = {}
+  -- if win:id() == nil then
+  -- --   winids[app] = winids[app]
+  --   print(show_table(win:application():pid()))
+  --   print(show_table(win:isstandard()))
+  -- -- else
+  -- --   winids[app] = {}
   -- end
+  -- print(win:id())
+    -- return
 
   -- Save the title to id mapping for later.
   appwinids[title] = id
@@ -586,7 +598,8 @@ function ext.utils.windowinfo_set(win, key)
     y = frame.y,
     w = frame.w,
     h = frame.h,
-    screen = screen:id()
+    screen = screen:id(),
+    space = totalspaces.window.space(win)
   }
 
   -- Save the stuff.
@@ -599,6 +612,9 @@ function ext.utils.windowinfo_reset(win, key)
   key = key or "app_info"
   -- get a full list of windows and whittle it down.
   local app = win:application():bundleid()
+  if app == nil then
+    app = 'nobundle'
+  end
   local appwinids = settings.get("app_info--" .. app) or {}
   -- local winfo = ext.win.title_to_info
   local id = win:id()
@@ -611,7 +627,15 @@ function ext.utils.windowinfo_reset(win, key)
   -- If the window's id isn't set, try to look it up by the window's title.
   if nwin == nil then
     local newid = appwinids[title]
-    nwin = settings.get(key .. "--" .. app .. "--" .. newid)
+    -- Don't break on failed values.
+    if newid ~= nil then
+      nwin = settings.get(key .. "--" .. app .. "--" .. newid)
+    end
+  end
+
+  -- Don't break on failed values.
+  if nwin == nil then
+    return
   end
 
   local frame = {
@@ -622,6 +646,11 @@ function ext.utils.windowinfo_reset(win, key)
   }
 
   ext.win.set(win, frame)
+
+  if nwin.space ~= nil then
+    -- print("moving " .. title .. "/" .. win:id() .. " to space " .. nwin.space)
+    totalspaces.window.movetospace(win, nwin)
+  end
 
 end
 
@@ -654,6 +683,12 @@ end
 -- apply function to a window with a timer
 function timewin(fn, param)
   return timer.new(0.05, function() dowin(fn, param) end)
+end
+
+function tableLength(table)
+  local count = 0
+  for _ in pairs(table) do count = count + 1 end
+  return count
 end
 
 return ext

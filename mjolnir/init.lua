@@ -5,9 +5,11 @@ local fnutils     = require "mjolnir.fnutils"
 local hotkey      = require "mjolnir.hotkey"
 local keycodes    = require "mjolnir.keycodes"
 local timer       = require "mjolnir._asm.timer"
+local scrwatcher  = require "mjolnir._asm.watcher.screen"
 local transform   = require "mjolnir.sk.transform"
 local window      = require "mjolnir.window"
 local screen      = require "mjolnir.screen"
+local totalspaces = require "mjolnir.totalspaces"
 
 local alert       = require "mjolnir.alert"
 local grid        = require "mjolnir.bg.grid"
@@ -98,7 +100,7 @@ local function setsize(size, stock)
   end
 
   -- Per app configs
-  if name == "Sublime Text 2" then
+  if name == "Sublime Text 2" or name == "Sublime Text 3" then
     if size == "s" then
       w = 800
       h = 600
@@ -217,39 +219,87 @@ function push(dir)
   elseif dir == "nw" then
     ext.win.send(win, "upleft")
   end
-
 end
 
-function saveSpaceWins(key)
-  local wins = ext.utils.visiblewindows()
+function saveSpaceWins(key, withInvisible)
+  local wins = nil
+  if withInvisible == nil then
+    wins = ext.utils.visiblewindows()
+  else
+    wins = window.allwindows()
+  end
 
   for k, win in pairs(wins) do
     ext.utils.windowinfo_set(win, key)
   end
 end
 
-function replaceSpaceWins(key)
-  local wins = ext.utils.visiblewindows()
+function replaceSpaceWins(key, invisible)
+  local wins = nil
+  if withInvisible == nil then
+    wins = ext.utils.visiblewindows()
+  else
+    wins = window.allwindows()
+  end
 
   for k, win in pairs(wins) do
     ext.utils.windowinfo_reset(win, key)
   end
 end
 
+function saveSpaceWinsByScreens(key)
+  local screens = screen.allscreens()
+  local keyscr = ext.utils.table_length(screens)
+  local newkey = key .. '--' .. keyscr
+  saveSpaceWins(newkey)
+end
+
+function restoreSpaceWinsByScreens(key)
+  local screens = screen.allscreens()
+  local keyscr = ext.utils.table_length(screens)
+  local newkey = key .. '--' .. keyscr
+  replaceSpaceWins(newkey)
+end
+
+-- Constantly save the window positions in the active space.
+function screenWatcher(key)
+  -- Save screens every 5 seconds, to allow revert on screen changes
+  local t = timer.new(5, function()
+    saveSpaceWinsByScreens('screen-window-save')
+  end)
+  t:start()
+
+  -- Restore screens whenever there's a screen change.
+  local sw = scrwatcher.new(function()
+    restoreSpaceWinsByScreens('screen-window-save')
+  end)
+  sw:start()
+end
+
 -- testing stuff
 -- hotkey.bind(hyper, 'T', function() alert.show(show_table(window.focusedwindow():frame()) .. show_table(window.focusedwindow():screen():fullframe()), 10)
--- print(show_table(window.focusedwindow():frame()), show_table(window.focusedwindow():screen():frame())) end)
+-- print(show_table(window.focusedwindow():frame()), show_table(window.focusedwindow():screen():frame()) .. window.focusedwindow():id()) end)
 
-hotkey.bind(hyper, 'T', function() print(ext.screen.win_screen_info(window.focusedwindow(),window.focusedwindow():screen())) end)
-hotkey.bind(mash, 'T', function() ext.screen.getscreeninfo() end)
+-- hotkey.bind(hyper, 'T', function() print(ext.screen.win_screen_info(window.focusedwindow(),window.focusedwindow():screen())) end)
+-- hotkey.bind(hyper, 'T', function() os.execute("ruby /Users/ryandekker/Desktop/changespace.rb " .. window.focusedwindow():id() .. " " .. 1) end)
+hotkey.bind(hyper, 'T', function()
+  local id = window.focusedwindow():id()
+  print (id)
+  print(window.windowforid(id):title())
 
+
+  local wins = totalspaces.window.allwindows()
+  for k, win in pairs(wins) do
+    print(win:title())
+  end
+end)
+hotkey.bind(mash, 'T', function() print(ext.win.space(window.focusedwindow())) end)
+
+
+-- Copy/paste window positions in a space.
 hotkey.bind(hyper, 'C', function() saveSpaceWins('manual-app-info') end)
 hotkey.bind(hyper, 'V', function() replaceSpaceWins('manual-app-info') end)
--- Constantly save the window positions in the active space.
--- (actually, that kinda prevents to more than 5 seconds ago...
- -- maybe have two save types?)
--- local t = timer.new(5, saveSpaceWins)
--- t:start()
+
 -- hotkey.bind(mash, 'V', replaceSpaceWins)
 
 hotkey.bind(hyper, "tab", function() ext.win.cycle(window.focusedwindow()) end)
