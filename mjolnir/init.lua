@@ -275,6 +275,7 @@ function screenWatcher(key)
   end)
   sw:start()
 end
+hotkey.bind(mash, 'V', function() restoreSpaceWinsByScreens('screen-window-save') end)
 
 -- testing stuff
 -- hotkey.bind(hyper, 'T', function() alert.show(show_table(window.focusedwindow():frame()) .. show_table(window.focusedwindow():screen():fullframe()), 10)
@@ -288,19 +289,22 @@ hotkey.bind(hyper, 'T', function()
   print(window.windowforid(id):title())
 
 
-  local wins = totalspaces.window.allwindows()
-  for k, win in pairs(wins) do
-    print(win:title())
-  end
+  local handle = io.popen("whoami")
+  local result = handle:read("*a")
+  handle:close()
+  print(result)
+  -- local wins = totalspaces.window.allwindows()
+  -- for k, win in pairs(wins) do
+  --   print(win:title())
+  -- end
 end)
-hotkey.bind(mash, 'T', function() print(ext.win.space(window.focusedwindow())) end)
+hotkey.bind(mash, 'T', function() print(totalspaces.window.space(window.focusedwindow())) end)
 
 
 -- Copy/paste window positions in a space.
 hotkey.bind(hyper, 'C', function() saveSpaceWins('manual-app-info') end)
 hotkey.bind(hyper, 'V', function() replaceSpaceWins('manual-app-info') end)
 
--- hotkey.bind(mash, 'V', replaceSpaceWins)
 
 hotkey.bind(hyper, "tab", function() ext.win.cycle(window.focusedwindow()) end)
 
@@ -356,8 +360,8 @@ hotkey.bind(hyper, 'S', function() push("se") end)
 hotkey.bind(hyper, 'A', function() push("sw") end)
 
 -- SCREENS
-hotkey.bind(hyper, ']', function() ext.win.throw(window.focusedwindow(), 'next') end)
-hotkey.bind(hyper, '[', function() ext.win.throw(window.focusedwindow(), 'previous') end)
+hotkey.bind(hyper, "'", function() ext.win.throw(window.focusedwindow(), 'next') end)
+hotkey.bind(hyper, ';', function() ext.win.throw(window.focusedwindow(), 'previous') end)
 
 --WINDOW FOCUS
 -- If this is sluggish, it appears to be due to a stuck process in the

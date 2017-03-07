@@ -9,7 +9,10 @@
 #ignore local machine specific directories
 local
 *.local
+local
+local.settings.php
 *.clkd.co
+clkd.co
 sites.php
 
 #Not sure what this is. Probably another project file

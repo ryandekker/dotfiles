@@ -1,13 +1,13 @@
 # Includes
-source `brew --prefix`/Library/Contributions/brew_bash_completion.sh
-source `brew --prefix`/Cellar/drush/6.5.0/etc/bash_completion.d/drush
+#source `brew --prefix`/Library/Contributions/brew_bash_completion.sh
+source `brew --prefix`/Cellar/drush/8.0.2/etc/bash_completion.d/drush
 source ~/dotfiles/bin/git-completion.bash
 
 MACHINE_NAME=$(cat /info/machine_name)
 
 # Make sure anything added by homebrew takes precendence over OS X defaults.
 export PATH="$HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/Cellar/ruby/1.9.3-p194/bin:$PATH"
-export PATH="$PATH:$HOME/.composer/vendor/bin"
+export PATH="$PATH:$HOME/.composer/vendor/bin:$HOME/pear/bin"
 
 # Platform.sh CLI configuration
 PLATFORMSH_CONF=~/.composer/vendor/platformsh/cli/platform.rc
@@ -93,16 +93,17 @@ export DRUSH_PHP="/usr/local/opt/php55/bin/php"
 export CLICOLOR=1
 export LSCOLORS=GxFxCxDxBxegedabagaced
 
-alias bin="sub ~/bin"
+alias bin="sub ~/dotfiles"
 alias vadm="varnishadm -T:6082"
 
 # Git editor
 #export GIT_EDITOR="/usr/bin/vim"
 #export GIT_EDITOR="/usr/local/bin/mate -w"
-export GIT_EDITOR="subl -nw"
+export GIT_EDITOR="/usr/local/bin/subl -nw"
 export EDITOR="subl -n"
 #export EDITOR=/usr"/local/bin/mate"
 alias sub="subl -n"
+alias sl="subl -n ."
 
 alias ht="cd ~/htdocs"
 alias hosts="sudo $EDITOR /etc/hosts"
@@ -120,8 +121,14 @@ alias php54="brew-php-select --set php54"
 alias php55="brew-php-select --set php55"
 alias fdns="sudo killall -HUP mDNSResponder"
 
+alias free="~/dotfiles/bin/memReport.py"
+alias mco="~/src/Minecraft-Overviewer/overviewer.py"
+
+alias ta="tmux attach-session -t"
+alias tl="tmux list-sessions"
+
 # Start, stop and restart solr easily.
-function solr {
+function ssolr {
   solrpath="/Users/ryandekker/Library/LaunchAgents/com.apache.solr.plist"
   case "$1" in
     "start" )

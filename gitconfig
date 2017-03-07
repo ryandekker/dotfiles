@@ -10,7 +10,8 @@
   interactive = true
 [push]
   default = tracking
-;[diff]
+[diff]
+  tool = opendiff
 ; external = /Users/ryandekker/bin/git-diff-filemerge.sh
 [merge]
   tool = opendiff
